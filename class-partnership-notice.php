@@ -113,7 +113,8 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 
 			add_action( 'admin_notices', array( $this, 'display_banner' ) );
-			add_action( 'wp_ajax_handle_extendify_install_' . $this->key, array( $this, 'dismiss' ) );
+			add_action( 'wp_ajax_handle_install_' . $this->key, array( $this, 'install' ) );
+			add_action( 'wp_ajax_handle_dismiss_' . $this->key, array( $this, 'dismiss' ) );
 		}
 
 		/**
@@ -175,7 +176,7 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 							function() {
 								var _this = $( this );
 								var data = {
-									action: 'handle_extendify_install_<?php echo $this->key; // phpcs:ignore WordPress.Security.EscapeOutput ?>',
+									action: 'handle_install_<?php echo $this->key; // phpcs:ignore WordPress.Security.EscapeOutput ?>',
 									_wpnonce: '<?php echo $nonce; // phpcs:ignore WordPress.Security.EscapeOutput ?>'
 								};
 								_this.attr( 'disabled', true ).text( "<?php echo $this->labels['installing']; // phpcs:ignore WordPress.Security.EscapeOutput ?>" );
@@ -222,7 +223,7 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 							jQuery.post(
 							window.ajaxurl,
 							{
-							action: 'handle_<?php echo $this->key; // phpcs:ignore WordPress.Security.EscapeOutput ?>',
+							action: 'handle_dismiss_<?php echo $this->key; // phpcs:ignore WordPress.Security.EscapeOutput ?>',
 							_wpnonce: '<?php echo $nonce; // phpcs:ignore WordPress.Security.EscapeOutput ?>'
 							}
 							);">
@@ -236,6 +237,32 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 			<?php
 
 			ob_end_flush();
+		}
+
+		/**
+		 * Install button click.
+		 *
+		 * @return void
+		 */
+		public function install() {
+			if ( isset( $_REQUEST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['_wpnonce'] ) ), $this->key ) ) {
+				wp_send_json_error(
+					array(
+						'message' => esc_html__( 'The security check failed. Please refresh the page and try again.' ),
+					),
+					401
+				);
+			}
+
+			update_user_option( get_current_user_id(), $this->key, time() );
+
+			try {
+				$this->install_and_activate_plugin( 'extendify' );
+			} catch ( Exception $e ) {
+				wp_send_json_error( array( 'message' => $e->getMessage() ), 500 );
+			}
+
+			wp_send_json_success();
 		}
 
 		/**
@@ -254,13 +281,6 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 			}
 
 			update_user_option( get_current_user_id(), $this->key, time() );
-
-			try {
-				$this->install_and_activate_plugin( );
-			} catch ( Exception $e ) {
-				wp_send_json_error( array( 'message' => $e->getMessage() ), 500 );
-			}
-
 			wp_send_json_success();
 		}
 
@@ -273,7 +293,7 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 		 * @since 5.8.0
 		 */
 		private function install_and_activate_plugin( $slug ) {
-			$plugin_id = self::get_plugin_id_by_slug( $slug );
+			$plugin_id = $this->get_plugin_id_by_slug( $slug );
 
 			if ( ! $plugin_id ) {
 				$installed = $this->install_plugin( $slug );
@@ -369,7 +389,7 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 			}
 
 			/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
-			$plugins = apply_filters( 'all_plugins', array( $this, 'get_plugins' ) );
+			$plugins = apply_filters( 'all_plugins', get_plugins() );
 			if ( ! is_array( $plugins ) ) {
 				return false;
 			}
@@ -396,55 +416,6 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 			}
 
 			return $slug;
-		}
-
-		/**
-		 * Get the activation status for a plugin.
-		 *
-		 * @param string $plugin_file The plugin file to check.
-		 *
-		 * @return string Either 'network-active', 'active' or 'inactive'.
-		 * @since 8.9.0
-		 */
-		private function get_plugin_status( string $plugin_file ): string {
-			if ( is_plugin_active_for_network( $plugin_file ) ) {
-				return 'network-active';
-			}
-
-			if ( is_plugin_active( $plugin_file ) ) {
-				return 'active';
-			}
-
-			return 'inactive';
-		}
-
-		/**
-		 * Returns a list of all plugins in the site.
-		 *
-		 * @return array
-		 * @uses  get_plugins()
-		 * @since 8.9.0
-		 */
-		public function get_plugins(): array {
-			if ( ! function_exists( 'get_plugins' ) ) {
-				require_once ABSPATH . 'wp-admin/includes/plugin.php';
-			}
-			/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
-			$plugins = apply_filters( 'all_plugins', get_plugins() );
-
-			if ( is_array( $plugins ) && ! empty( $plugins ) ) {
-				foreach ( $plugins as $plugin_slug => $plugin_data ) {
-					$plugins[ $plugin_slug ]['active'] = in_array(
-						$this->get_plugin_status( $plugin_slug ),
-						array( 'active', 'network-active' ),
-						true
-					);
-				}
-
-				return $plugins;
-			}
-
-			return array();
 		}
 	}
 }
