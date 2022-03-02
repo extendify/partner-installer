@@ -1,7 +1,7 @@
 # Company Partnerships
 
 ## Notice + Installer
-To use, add the following anywhere in your project that makes sense to load dependencies.
+To use, add the following anywhere in your project that makes sense to load dependencies:
 ```php
 $project_name = 'My Project';
 
@@ -15,7 +15,7 @@ require_once get_template_directory() . '/class-partnership-notice.php';
 new Extendify_Partner( $project_name, $logo, array( 'themes' ), $labels );
  ```
 
- To add your logo, you can use either html string or an array
+ To add your logo, you can use either html string or an array:
 ```php
 $logo = '<svg width="128" height="128">...</svg>';
 // or
