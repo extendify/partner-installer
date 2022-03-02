@@ -53,17 +53,17 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 		 */
 		public function __construct( string $project = '', $image = array(), $pages = array('themes'), array $labels = array() ) {
 
-            // Checking for active banner.
+			// Checking for active banner.
 			if ( isset( $GLOBALS['extendify_d_notice_showing'] ) && true === $GLOBALS['extendify_d_notice_showing'] ) {
-                return;
-			}
-
-			if ( '' === $project ) {
-                echo 'Extendify Partner: No project name given.  Please specify the name of your theme or plugin.';
 				return;
 			}
 
-            $GLOBALS['extendify_partner_name'] = $project;
+			if ( '' === $project ) {
+				echo 'Extendify Partner: No project name given.  Please specify the name of your theme or plugin.';
+				return;
+			}
+
+			$GLOBALS['extendify_partner_name'] = $project;
 
 			// Labels.
 			$default_labels = array(
