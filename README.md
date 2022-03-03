@@ -1,4 +1,4 @@
-# Extendify Installer
+# Extendify Notice
 This code will add a notice when a plugin or theme is activated. The notice will recommend that the Extendify plugin is optionally installed from the WordPress.org servers. The notice will appear on either the theme or plugin install page. If dismissed, the notice will never be displayed again to that user.
 
 **Steps:**
