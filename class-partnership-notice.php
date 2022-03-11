@@ -68,15 +68,15 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
 			// Labels.
 			$default_labels = array(
 				// translators: %1$s = theme name, %2$s = Extendify brand.
-				'header'        => wp_sprintf( esc_html__( '%1$s + %2$s = Awesomeness' ), $project ),
+				'header'        => wp_sprintf( esc_html__( '%1$s + %2$s = Awesomeness' ), $project, 'Extendify' ),
 				// translators: %1$s = theme name.
-				'main_content'  => wp_sprintf( esc_html__( 'We\'re excited to announce that %1$s is partnering with the %2$s library of Gutenberg patterns and templates to bring %1$s users even more beautiful block patterns and templates! Install and activate the %2$s plugin to receive access to the library. Note: this is an optional step and %1$s will continue to work without %2$s.' ), $project ),
+				'main_content'  => wp_sprintf( esc_html__( 'We\'re excited to announce that %1$s is partnering with the %2$s library of Gutenberg patterns and templates to bring %1$s users even more beautiful block patterns and templates! Install and activate the %2$s plugin to receive access to the library. Note: this is an optional step and %1$s will continue to work without %2$s.' ), $project, 'Extendify' ),
 				// translators: %1$s = Extendify Brand.
-				'install'       => wp_sprintf( esc_html__( 'Install & Activate %1$s' ) ),
+				'install'       => wp_sprintf( esc_html__( 'Install & Activate %1$s' ), 'Extendify' ),
 				'installing'    => esc_html__( 'Installing...' ),
 				'reloading'     => esc_html__( 'Finished. Reloading...' ),
 				// translators: %1$s = Extendify Brand.
-				'dismiss_label' => wp_sprintf( esc_attr__( 'Dismiss %1$s notice' ) ),
+				'dismiss_label' => wp_sprintf( esc_attr__( 'Dismiss %1$s notice' ), 'Extendify' ),
 			);
 
 			$this->labels = wp_parse_args( $labels, $default_labels );
@@ -425,9 +425,10 @@ if ( ! class_exists( 'Extendify_Partner', false ) ) {
  * In order to update the plugin.
  */
 if ( ! class_exists( 'Extendify_D_PluginUpgraderSkin' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader-skin.php';
+    include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+    include_once ABSPATH . 'wp-admin/includes/file.php';
 
-	class Extendify_D_PluginUpgraderSkin extends WP_Upgrader_Skin {
+    class Extendify_D_PluginUpgraderSkin extends \Automatic_Upgrader_Skin {
 		/**
 		 * Stores the last error key;
 		 *
